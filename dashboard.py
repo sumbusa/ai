@@ -502,7 +502,7 @@ else:
 
 # Sidebar for navigation
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "Prediction", "Model Performance"])
+page = st.sidebar.radio("Go to", ["Home", "Prediction", "Model Performance", "Statistical Analysis"])
 
 # Main content based on selected page
 if page == "Home":
@@ -883,3 +883,32 @@ elif page == "Model Performance":
         <p><b>F1 Score:</b> Harmonic mean of precision and recall, providing a balance between the two metrics.</p>
         </div>
         """, unsafe_allow_html=True)
+
+elif page == "Statistical Analysis":
+    st.markdown("<h1 class='main-header'>Statistical Analysis</h1>", unsafe_allow_html=True)
+
+    if hypothesis_results is None:
+        st.warning("Hypothesis testing results not available.")
+    elif 'anova_results' not in hypothesis_results:
+        st.error("ANOVA results not found in the loaded data.")
+    else:
+        anova_dict = hypothesis_results['anova_results']
+
+        # Filter only features that exist in the DataFrame
+        valid_features = [key for key in anova_dict.keys() if key in df.columns]
+
+        if not valid_features:
+            st.warning("No valid features available for ANOVA plotting.")
+        else:
+            st.markdown("### ANOVA Box Plots by Feature")
+            selected_feature = st.selectbox("Select a feature to view ANOVA results", valid_features)
+
+            fig = plot_anova_results(df, selected_feature)
+            st.plotly_chart(fig, use_container_width=True)
+
+            st.markdown("""
+            <div class='metric-card'>
+                <p>This box plot shows the distribution of the selected feature across different quality classes. 
+                Use this to identify if there is a significant difference in feature behavior by class.</p>
+            </div>
+            """, unsafe_allow_html=True)
